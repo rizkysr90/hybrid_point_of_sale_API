@@ -1,22 +1,50 @@
 require('dotenv').config();
 const express = require('express');
-const authRoutes = require('./src/routes/auth.route.js');
+const session = require("express-session");
+const {sequelize : configDb} = require('./models/index.js');
+const sequelizeStore = require('connect-session-sequelize');
 const morgan = require('morgan');
+const cors = require('cors');
 const app = express();
+const authRoutes = require('./src/routes/auth.route.js');
+const verifyUser = require('./src/middlewares/verifyUser.middleware.js');
+const onlyAdmin = require('./src/middlewares/onlyAdmin.middleware.js');
 
+const sessionStore = sequelizeStore(session.Store);
+const store = new sessionStore({
+    db : configDb
+})
 app.use(morgan('tiny'));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-
+app.use(cors({
+    credentials: true,
+    origin: 'http://localhost:3000'
+}));
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    store: store,
+    cookie: {
+        secure: 'auto'
+    }
+}));
 app.get('/',(req,res) => {
     res.json('Hello World');
 });
 
 app.use('/auth', authRoutes);
 
-
-
-
+app.get('/tes', (req,res,next) => {
+    res.status(200).json('Helllo mang');
+})
+app.get('/getAdmin', verifyUser, onlyAdmin, (req,res,next) => {
+    res.status(200).json({
+        msg: 'ok'
+    });
+})
+// app.get
 app.use((err, req, res, next) => {
     console.error(err.message);
     const statusCode = err.error_code || 500;
@@ -30,4 +58,5 @@ app.use((err, req, res, next) => {
     }
     res.status(statusCode).json(resBody);
   });
-module.exports = app;
+
+module.exports = {store,app};

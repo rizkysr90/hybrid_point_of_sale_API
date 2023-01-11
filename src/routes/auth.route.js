@@ -4,6 +4,8 @@ const jwtValidation = require('./../middlewares/jwt.middleware.js');
 
 router.post('/register', authController.register);
 router.post('/login', authController.login);
+router.delete('/logout', authController.logout);
+router.get('/me', authController.me);
 router.get('/veryprivate', jwtValidation, (req,res,next) => {
     res.json({ok:"ok"});
 })

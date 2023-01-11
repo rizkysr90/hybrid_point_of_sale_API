@@ -3,24 +3,32 @@ const { User } = require('../../models/index.js');
 const { errors : throwError, success } = require('../utils/response.util.js');
 const { hash,compare } = require('../utils/bcrypt.util.js');
 const jwt = require('jsonwebtoken');
+const { Op } = require("sequelize");
 
 const register = async (req) => {
-    let { email,password,role } = req.body;
-    let findUserByEmail = await User.findOne({ where : { email } });
-    if (findUserByEmail) {
-        // if user with the email provided by client is found then 
-        // register will failed because 1 email for 1 user (unique)
-        throwError('email sudah pernah digunakan',400,{});
+    let { email, password, role, confirm_password, phone_number } = req.body;
+    if (confirm_password !== password) {
+        throwError(400, {}, 'konfirmasi password tidak sesuai');
+    }
+    let checkingUniqUsers = await User.findOne({ 
+        where : {
+            [Op.or]: [{ email }, { phone_number }] 
+        }
+    });
+    if (checkingUniqUsers) {
+        throwError(400,{},'email atau nomor hp sudah pernah digunakan');
     };
+    
     let hashedPassword = await hash(password);
     let dataToBeInsertToDatabase = {
         email,
         password : hashedPassword,
-        role
+        role,
+        phone_number
     };
-    let newUser = await User.create(dataToBeInsertToDatabase);
+    let userCreation = await User.create(dataToBeInsertToDatabase);
 
-    return success('berhasil membuat user baru',{ id: newUser.id },201);
+    return success(201,{ id: userCreation.id },'sukses membuat user baru');
 
 }
 const login = async (req,res,next) => {
@@ -34,25 +42,36 @@ const login = async (req,res,next) => {
          }
      });
      if (!findUserByEmail) {
-         throwError('data pengguna tidak ditemukan',404,{});
+         throwError(404,{},'data pengguna tidak ditemukan');
      };
      const comparingPassword = await compare(password,findUserByEmail.password);
      if (!comparingPassword) {
-        throwError('email atau password salah',400,{});
+        throwError(404,{},'email atau password salah');
     };
-    const payload = {
-        id : findUserByEmail.id,
-        role : findUserByEmail.role
-    }
-    const token = jwt.sign(payload,process.env.JWT_SECRET,{expiresIn: '30 days'});
-    const resBody = {
-        id : findUserByEmail.id,
-        role : findUserByEmail.role,
-        token
-    }
-    return success('login berhasil',resBody,200);
+    req.session.userId = findUserByEmail.id;
+    req.session.role = findUserByEmail.role;
+    return success(200,{id : findUserByEmail.id, role : findUserByEmail.role},'login berhasil');
 }
+
+const me = async (req,res,next) => {
+    if (!req.session.userId) {
+        throwError( 400, {}, 'mohon login terlebih dahulu');
+
+    }
+    const findUserByEmail = await User.findOne({
+        where : {
+            id : req.session.userId
+        }
+    });
+    if (!findUserByEmail) {
+        throwError(404,{},'data pengguna tidak ditemukan');
+    };
+    return success(200, {id : findUserByEmail.id, email : findUserByEmail.email, role : findUserByEmail.role}, 'berhasil mendapatkan data');
+
+}
+
 module.exports = {
     register,
-    login
+    login,
+    me
 }
