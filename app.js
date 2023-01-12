@@ -9,6 +9,8 @@ const app = express();
 const authRoutes = require('./src/routes/auth.route.js');
 const verifyUser = require('./src/middlewares/verifyUser.middleware.js');
 const onlyAdmin = require('./src/middlewares/onlyAdmin.middleware.js');
+const usersRoutes = require('./src/routes/users.route.js');
+const productCategoriesRoutes = require('./src/routes/productCategory.route.js');
 
 const sessionStore = sequelizeStore(session.Store);
 const store = new sessionStore({
@@ -35,7 +37,8 @@ app.get('/',(req,res) => {
 });
 
 app.use('/auth', authRoutes);
-
+app.use('/users', usersRoutes);
+app.use('/productCategories', productCategoriesRoutes);
 app.get('/tes', (req,res,next) => {
     res.status(200).json('Helllo mang');
 })

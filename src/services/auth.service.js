@@ -2,11 +2,10 @@ require('dotenv').config();
 const { User } = require('../../models/index.js');
 const { errors : throwError, success } = require('../utils/response.util.js');
 const { hash,compare } = require('../utils/bcrypt.util.js');
-const jwt = require('jsonwebtoken');
 const { Op } = require("sequelize");
 
 const register = async (req) => {
-    let { email, password, role, confirm_password, phone_number } = req.body;
+    let { name,email, password, role, confirm_password, phone_number } = req.body;
     if (confirm_password !== password) {
         throwError(400, {}, 'konfirmasi password tidak sesuai');
     }
@@ -21,6 +20,7 @@ const register = async (req) => {
     
     let hashedPassword = await hash(password);
     let dataToBeInsertToDatabase = {
+        name,
         email,
         password : hashedPassword,
         role,
