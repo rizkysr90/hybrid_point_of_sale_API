@@ -49,7 +49,7 @@ app.get('/getAdmin', verifyUser, onlyAdmin, (req,res,next) => {
 })
 // app.get
 app.use((err, req, res, next) => {
-    console.error(err.message);
+    console.error(err);
     const statusCode = err.error_code || 500;
     const data = err.data || {};
     const resBody = {

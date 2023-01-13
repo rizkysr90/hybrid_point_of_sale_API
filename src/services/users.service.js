@@ -1,7 +1,6 @@
 const { User } = require('../../models/index.js');
 const { errors : throwError, success } = require('../utils/response.util.js');
-const { Op } = require("sequelize");
-
+const { hash } = require('../utils/bcrypt.util.js');
 
 const get = async () => {
     const getUsers = await User.findAll();
@@ -20,7 +19,7 @@ const getById = async (req) => {
     return success(200, getUser, 'sukses mendapatkan data');
 }
 const update = async (req) => {
-    const {name, email, phone_number,password,confirm_password,role} = req.body;
+    let {name, email, phone_number,password,confirm_password,role} = req.body;
     const {userId} = req.params;
     let findUser = await User.findByPk(userId);
     let isUnique = true;
