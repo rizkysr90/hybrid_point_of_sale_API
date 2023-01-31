@@ -1,5 +1,6 @@
 const { Product, product_category } = require('../../models/index.js');
 const cloudinary = require('../utils/cloudinary.util');
+const pagination = require('../utils/pagination.util.js');
 const { success, errors:throwError } = require('../utils/response.util.js');
 
 const uploaderImg = async (path,opts) => await cloudinary.uploadCloudinary(path,opts);
@@ -19,14 +20,18 @@ const create = async (req) => {
     return success(201, {}, 'berhasil menambahkan produk');
 }
 
-const getAll = async () => {
+const getAll = async (req) => {
+    const {page, row} = pagination(req.body.page, req.body.row);
     const opt = {
         order : [
             ['name', 'ASC']
         ],
         include : {
             model : product_category
-        }
+        },
+        limit: row,
+        offset: page
+
     }
 
     const getData = await Product.findAll(opt);

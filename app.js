@@ -13,6 +13,9 @@ const usersRoutes = require('./src/routes/users.route.js');
 const productCategoriesRoutes = require('./src/routes/productCategory.route.js');
 const productRoutes = require('./src/routes/product.route');
 const of_orders = require('./src/routes/of_order.route');
+const regionRoutes = require('./src/routes/region.route');
+const customerRoutes = require('./src/routes/customer.route');
+
 
 
 const sessionStore = sequelizeStore(session.Store);
@@ -38,7 +41,8 @@ app.use(session({
 app.get('/',(req,res) => {
     res.json('Hello World');
 });
-
+app.use('/regions', regionRoutes);
+app.use('/customers', customerRoutes);
 app.use('/auth', authRoutes);
 app.use('/users', usersRoutes);
 app.use('/productCategories', productCategoriesRoutes);

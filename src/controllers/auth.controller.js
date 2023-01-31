@@ -31,6 +31,22 @@ const logout = async (req,res,next) => {
         data : {}});
     });
 }
+const registerCustomer = async (req,res,next) => {
+    try {
+        const response = await authService.registerCustomer(req);
+        res.status(201).json(response);
+    } catch (error) {
+        next(error);
+    }
+}
+const loginCustomer = async (req,res,next) => {
+    try {
+        const response = await authService.loginCustomer(req);
+        res.status(200).json(response);
+    } catch (error) {
+        next(error)
+    }
+}
 const me = async (req,res,next) => {
     try {
         const response = await authService.me(req);
@@ -42,5 +58,5 @@ const me = async (req,res,next) => {
 
 
 module.exports = {
-    register,login,logout,me
+    register,login,logout,me,registerCustomer,loginCustomer
 }

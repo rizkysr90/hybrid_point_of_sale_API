@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { User } = require('../../models/index.js');
+const { User, Customer } = require('../../models/index.js');
 const { errors : throwError, success } = require('../utils/response.util.js');
 const { hash,compare } = require('../utils/bcrypt.util.js');
 const { Op } = require("sequelize");
@@ -29,6 +29,51 @@ const register = async (req) => {
     let userCreation = await User.create(dataToBeInsertToDatabase);
 
     return success(201,{ id: userCreation.id },'sukses membuat user baru');
+
+}
+const loginCustomer = async (req) => {
+    let {
+        email,
+        password
+     } = req.body;
+     const findCustomerByEmail = await Customer.findOne({
+         where : {
+             email
+         }
+     });
+     if (!findCustomerByEmail) {
+         throwError(404,{},'data pengguna tidak ditemukan');
+     };
+     const comparingPassword = await compare(password,findCustomerByEmail.password);
+     if (!comparingPassword) {
+        throwError(404,{},'email atau password salah');
+    };
+    req.session.customerId = findCustomerByEmail.id;
+    return success(200,{id : findCustomerByEmail.id},'login berhasil');
+}
+const registerCustomer = async (req) => {
+    let { fullname, email , password, confirm_password } = req.body;
+    if (confirm_password !== password) {
+        throwError(400, {}, 'konfirmasi password tidak sesuai');
+    }
+    let checkingUniqUsers = await Customer.findOne({ 
+        where : {
+            email
+        }
+    });
+    if (checkingUniqUsers) {
+        throwError(400,{},'email sudah pernah digunakan');
+    };
+    
+    let hashedPassword = await hash(password);
+    let dataToBeInsertToDatabase = {
+        fullname,
+        email,
+        password : hashedPassword,
+    };
+    let customerCreation = await Customer.create(dataToBeInsertToDatabase);
+    req.session.customerId = customerCreation.id;
+    return success(201,{ id: customerCreation.id },'sukses membuat akun customer baru');
 
 }
 const login = async (req,res,next) => {
@@ -73,5 +118,7 @@ const me = async (req,res,next) => {
 module.exports = {
     register,
     login,
-    me
+    me,
+    loginCustomer,
+    registerCustomer
 }
