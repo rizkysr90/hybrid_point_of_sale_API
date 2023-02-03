@@ -1,4 +1,4 @@
-const {create, getAll} = require('./../services/on_order.service')
+const {create, getAll, getById} = require('./../services/on_order.service')
 
 const createOrder = async (req,res,next) => {
     try {
@@ -17,17 +17,18 @@ const getMyOrder = async (req,res,next) => {
     }
 }
 
-// const getOrderById = async (req,res,next) => {
-//     try {
-//         const response = await getById(req);
-//         res.status(200).json(response);
-//     } catch (error) {
-//         next(error);
-//     }
-// }
+const getOrderById = async (req,res,next) => {
+    try {
+        const response = await getById(req);
+        res.status(200).json(response);
+    } catch (error) {
+        next(error);
+    }
+}
 
 
 module.exports = {
     createOrder,
-    getMyOrder
+    getMyOrder,
+    getOrderById
 }

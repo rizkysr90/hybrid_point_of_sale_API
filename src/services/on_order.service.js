@@ -62,7 +62,23 @@ const getAll = async (req) => {
 
 }
 
+const getById = async (req) => {
+    // req.params.id
+    const opt = {
+        include : [
+            {
+                model : Product
+            }
+           
+        ]
+    ,
+    }
+    const getData = await On_order.findByPk(req.params.id, opt);
+    return success(200,getData,'sukses mendapatkan data');
+}
+
 module.exports = {
     create,
-    getAll
+    getAll,
+    getById
 }
