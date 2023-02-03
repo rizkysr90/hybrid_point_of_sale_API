@@ -26,7 +26,7 @@ module.exports = {
       },
       status: {
         type: Sequelize.STRING,
-        defaultValue: "belum bayar"
+        defaultValue: "belum dibayar"
       },
       evidence_of_tf: {
         type: Sequelize.STRING
