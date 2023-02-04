@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { User, Customer } = require('../../models/index.js');
+const { User, Customer, Cart } = require('../../models/index.js');
 const { errors : throwError, success } = require('../utils/response.util.js');
 const { hash,compare } = require('../utils/bcrypt.util.js');
 const { Op } = require("sequelize");
@@ -72,6 +72,9 @@ const registerCustomer = async (req) => {
         password : hashedPassword,
     };
     let customerCreation = await Customer.create(dataToBeInsertToDatabase);
+    if (customerCreation) {
+        await Cart.create({customer_id:customerCreation.id})
+    }
     req.session.customerId = customerCreation.id;
     return success(201,{ id: customerCreation.id },'sukses membuat akun customer baru');
 

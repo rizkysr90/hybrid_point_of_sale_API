@@ -16,7 +16,7 @@ const of_orders = require('./src/routes/of_order.route');
 const on_orders = require('./src/routes/on_order.route');
 const regionRoutes = require('./src/routes/region.route');
 const customerRoutes = require('./src/routes/customer.route');
-
+const cartRoutes = require('./src/routes/cart.route');
 
 
 const sessionStore = sequelizeStore(session.Store);
@@ -46,6 +46,7 @@ app.use('/regions', regionRoutes);
 app.use('/customers', customerRoutes);
 app.use('/auth', authRoutes);
 app.use('/users', usersRoutes);
+app.use('/carts', cartRoutes);
 app.use('/productCategories', productCategoriesRoutes);
 app.use('/products', productRoutes);
 app.use('/ofOrders', of_orders);
