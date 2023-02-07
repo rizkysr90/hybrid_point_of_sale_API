@@ -4,6 +4,7 @@ const queryInterface = sequelize.getQueryInterface();
 const pagination = require('../utils/pagination.util');
 
 const create = async (req) => {
+    console.log(req.body);
     const creationOrder = await On_order.create({
         id : `TRX-${Date.now()}`,
         CustomerId: req.session.customerId,
@@ -18,7 +19,9 @@ const create = async (req) => {
         qty_product : req.body.qty_product
 
     })
-    const newArr = req.body.products.map((elm,idx) => {
+    let newArr = [];
+    if (req.body.products.length < 2) {
+        newArr = req.body.products.map((elm,idx) => {
         return {
             OnOrderId : creationOrder.id,
             ProductId : elm.id,
@@ -28,6 +31,18 @@ const create = async (req) => {
             updatedAt : new Date()
         }
     })
+    } else {
+        newArr = req.body.products.map((elm,idx) => {
+            return {
+                OnOrderId : creationOrder.id,
+                ProductId : elm.id,
+                qty : elm.Cart_detail.qty,
+                sum_price_each: elm.Cart_detail.qty * elm.sell_price,
+                createdAt : new Date(),
+                updatedAt : new Date()
+            }
+        })
+    }
     queryInterface.bulkInsert('On_orders_details', newArr);
     return success(201, {order_id : creationOrder.id}, 'berhasil menambahkan data order');
 }

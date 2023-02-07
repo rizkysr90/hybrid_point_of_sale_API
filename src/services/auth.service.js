@@ -80,6 +80,7 @@ const registerCustomer = async (req) => {
 
 }
 const login = async (req,res,next) => {
+    console.log('HEYYY');
     let {
         email,
         password

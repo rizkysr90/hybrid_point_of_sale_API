@@ -9,10 +9,18 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       CartId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Carts',
+          key: 'id'
+        }
       },
       ProductId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Products',
+          key: 'id'
+        }
       },
       qty: {
         type: Sequelize.INTEGER
