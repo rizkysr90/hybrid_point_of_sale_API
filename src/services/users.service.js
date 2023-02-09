@@ -4,7 +4,9 @@ const { hash } = require('../utils/bcrypt.util.js');
 
 const get = async () => {
     const getUsers = await User.findAll();
-    return success(200,getUsers,'sukses mendapatkan data');
+    return success(200,getUsers,'sukses mendapatkan data', {
+        attributes: { exclude: ['password'] }
+    });
 }
 const getById = async (req) => {
     const {userId} = req.params;

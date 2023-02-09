@@ -54,7 +54,7 @@ app.use('/onOrders', on_orders);
 app.get('/tes', (req,res,next) => {
     res.status(200).json('Helllo mang');
 })
-app.get('/getAdmin', verifyUser, onlyAdmin, (req,res,next) => {
+app.get('/getAdmin', verifyUser, (req,res,next) => {
     res.status(200).json({
         msg: 'ok'
     });
