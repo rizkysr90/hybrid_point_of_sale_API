@@ -71,7 +71,7 @@ const update = async (req) => {
         }
     })
 
-    return success(200,{},'sukses update data')
+    return success(200,{},'sukses update data');
 }
 
 const destroy = async (req) => {
@@ -83,10 +83,21 @@ const destroy = async (req) => {
     return success(200, {}, 'berhasil menghapus produk');
 }
 
+const archive = async (req) => {
+    const {is_active} = req.query
+    await Product.update({is_active}, {
+        where : {
+            id : req.params.id
+        }
+    })
+    return success(200,{},'sukses update data');
+}
+
 module.exports = {
     create,
     getAll,
     getById,
     update,
-    destroy
+    destroy,
+    archive
 }

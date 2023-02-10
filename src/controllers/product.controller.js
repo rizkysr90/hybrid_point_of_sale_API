@@ -1,4 +1,4 @@
-const { create,getAll,getById, update, destroy }  = require('./../services/product.service');
+const { create,getAll,getById, update, destroy, archive }  = require('./../services/product.service');
 
 const createProduct = async (req,res,next) => {
     try {
@@ -41,10 +41,19 @@ const deleteProduct = async (req,res,next) => {
         next(error);
     }
 }
+const archiveProduct = async (req,res,next) => {
+    try {
+        const response = await archive(req);
+        res.status(200).json(response);
+    } catch (error) {
+        next(error);
+    }
+}
 module.exports = {
     createProduct,
     getAllProduct,
     getProductById,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    archiveProduct
 }
