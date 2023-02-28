@@ -10,13 +10,19 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
+      const fk_userId = {
+        foreignKey : 'user_id'
+      }
       models.of_orders.belongsToMany(models.Product, {through : 'of_orders_details'});
+      models.User.hasMany(models.of_orders, fk_userId);
+      models.of_orders.belongsTo(models.User, fk_userId);
     }
   }
   of_orders.init({
     amount: DataTypes.DOUBLE,
     pay_amount: DataTypes.DOUBLE,
-    status: DataTypes.STRING
+    status: DataTypes.STRING,
+    user_id: DataTypes.INTEGER
   }, {
     sequelize,
     paranoid: true,

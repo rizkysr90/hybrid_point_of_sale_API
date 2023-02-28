@@ -1,4 +1,4 @@
-const { Product, product_category } = require('../../models/index.js');
+const { Product, product_category, Snap_product } = require('../../models/index.js');
 const cloudinary = require('../utils/cloudinary.util');
 const pagination = require('../utils/pagination.util.js');
 const { success, errors:throwError } = require('../utils/response.util.js');
@@ -16,7 +16,18 @@ const create = async (req) => {
     const secure_url = eager[0].secure_url;
     req.body.url_img = secure_url;
     req.body.id_cloudinary_img = public_id;
-    await Product.create(req.body);
+    const prepSnapData = {
+        name : req.body.name,
+        url_img : secure_url,
+        weight: req.body.product_weight,
+        sell_price: req.body.sell_price,
+        ship_weight: req.body.shipping_weight,
+        description : req.body.description,
+        sku : req.body.sku
+    }
+    const creationProduct = await Product.create(req.body);
+    prepSnapData.product_id = creationProduct.id;
+    await Snap_product.create(prepSnapData);
     return success(201, {}, 'berhasil menambahkan produk');
 }
 
@@ -53,11 +64,11 @@ const getById = async (req) => {
 }
 
 const update = async (req) => {
-    console.log('DEBUGGING',req.file);
     const optionsCloudinary = {
         type: "image",
         folder: "skripsi/images/products"
     }
+    const findProduct = await Product.findByPk(req.params.id);
     if (req.file) {
         const up = await uploaderImg(req.file.path, optionsCloudinary);
         const {public_id, eager} = up;
@@ -65,11 +76,22 @@ const update = async (req) => {
         req.body.url_img = secure_url;
         req.body.id_cloudinary_img = public_id;
     }
+    const prepSnapData = {
+        name : req.body.name,
+        url_img : req.body.url_img ? req.body.url_img : findProduct.url_img ,
+        weight: req.body.product_weight,
+        sell_price: req.body.sell_price,
+        ship_weight: req.body.shipping_weight,
+        description : req.body.description,
+        sku : req.body.sku,
+        product_id : req.params.id
+    }
     await Product.update(req.body,{
         where : {
             id : req.params.id
         }
     })
+    await Snap_product.create(prepSnapData);
 
     return success(200,{},'sukses update data');
 }

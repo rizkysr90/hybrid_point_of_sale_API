@@ -1,4 +1,4 @@
-const { of_orders, Product,of_orders_details,sequelize } = require('../../models/index.js');
+const { of_orders, Product, of_orders_details , Snap_product, User, sequelize } = require('../../models/index.js');
 const { success } = require('../utils/response.util.js');
 const queryInterface = sequelize.getQueryInterface();
 
@@ -7,19 +7,28 @@ const create = async (req) => {
         id : `TRX-${Date.now()}`,
         status : req.body.status,
         amount : req.body.amount,
-        pay_amount : req.body.pay_amount
+        pay_amount : req.body.pay_amount,
+        user_id : req.user.id
     })
-    const newArr = req.body.products.map((elm,idx) => {
+    const newArr = await Promise.all(req.body.products.map(async (elm,idx) => {
+        let findSnap = await Snap_product.findOne({
+            where : {
+                product_id : elm.product_id
+            },
+            order : [['createdAt', 'ASC']]
+        })
         return {
             ofOrderId : creationOrder.id,
-            ProductId : elm.text.product_id,
-            qty : elm.text.qty,
-            sum_price_each: elm.text.amount,
+            ProductId : elm.product_id,
+            qty : elm.qty,
+            sum_price_each: elm.amount,
             createdAt : new Date(),
-            updatedAt : new Date()
+            updatedAt : new Date(),
+            snap_product_id :findSnap.id
         }
-    })
-    queryInterface.bulkInsert('of_orders_details', newArr);
+    }))
+    console.log('Gass', newArr);
+    await queryInterface.bulkInsert('of_orders_details', newArr);
 
     return success(201, {order_id : creationOrder.id}, 'berhasil menambahkan data order');
 
@@ -31,6 +40,9 @@ const getById = async (req) => {
             {
                 model: Product
             },
+            {
+                model: User
+            }
             
         ]
             
