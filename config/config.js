@@ -7,6 +7,17 @@ module.exports = {
     "database": `${process.env.DB_NAME}`,
     "host": "localhost",
     "dialect": "postgres",
+    dialectOptions: {
+      useUTC: false, //for reading from database
+      dateStrings: true,
+      typeCast: function (field, next) { // for reading from database
+        if (field.type === 'DATETIME') {
+          return field.string()
+        }
+          return next()
+        },
+    },
+    timezone: '+07:00'
   },
   "test": {
     "username": "postgres",
@@ -20,6 +31,17 @@ module.exports = {
     "password": process.env.DB_PASSWORD,
     "database": process.env.DB_NAME,
     "host": process.env.PROD_DB_HOST,
-    "dialect": "postgres"
+    "dialect": "postgres",
+    dialectOptions: {
+      useUTC: false, //for reading from database
+      dateStrings: true,
+      typeCast: function (field, next) { // for reading from database
+        if (field.type === 'DATETIME') {
+          return field.string()
+        }
+          return next()
+        },
+    },
+    timezone: '+07:00'
   }
 }

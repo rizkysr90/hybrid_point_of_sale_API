@@ -2,7 +2,7 @@ const { of_orders, Product, of_orders_details , Snap_product, User, sequelize } 
 const { success } = require('../utils/response.util.js');
 const {Op} = require('sequelize');
 const queryInterface = sequelize.getQueryInterface();
-
+const pagination = require('../utils/pagination.util')
 const create = async (req) => {
     const creationOrder = await of_orders.create({
         id : `TRX-${Date.now()}`,
@@ -38,47 +38,46 @@ const getAll = async (req) => {
     let {startDate, endDate} = req.query;
     [startDate] = startDate.split('T');
     [endDate] = endDate.split('T');
-    // SELECT * FROM of_orders WHERE createdAt BETWEEN
+    startDate = startDate + ' ' + '00:00:00.000';
+    endDate = endDate + ' ' + '23:59:59.999';
+
+    let {offset} = req.query;
+    let {page, row} = pagination(offset, 20);
     let opts = {};
     let opts2 = {};
-    // {
-    //     where : {
-    //         createdAt : {
-    //             [Op.between]: [startDate, endDate],
-    //         }
-    //     }
-    // }
-    if (startDate === endDate) {
-        let arrEndDate = endDate.split('-');
-        let getDate = Number(arrEndDate[2]);
-        getDate += 01;
-        if (getDate < 10) {
-            getDate = '0' + String(getDate)
+    opts.where = {
+        createdAt : {
+            [Op.between]: [startDate, endDate],
         }
-        arrEndDate[2] = getDate;
-        endDate = arrEndDate.join('-');
-        opts.where = {
-            createdAt : {
-                [Op.and] :{
-                    [Op.gte] : startDate,
-                    [Op.lt] : endDate
-
-                }
-                
-            }
-        }
-    
     }
-    opts2 = {...opts};
-    opts2.attributes = [[sequelize.fn('SUM', sequelize.col('amount')), 'sum_of_orders']]
+    opts.limit = row;
+    opts.offset = page;
+    opts.order = [
+        ['createdAt', 'ASC']
+    ]
+    // for meta data required
+    let aggregations1 = null;
+    if (req.query?.meta) {
+        opts2 = {...opts, order : null, limit : null, offset : null};
+        opts2.attributes = [[sequelize.fn('SUM', sequelize.col('amount')), 'sum_of_orders'],
+                            [sequelize.fn('COUNT', sequelize.col('id')), 'count_of_orders']    
+        ]
+        aggregations1 = await of_orders.findAll(opts2);
+
+    }
     const findOrder = await of_orders.findAll(opts);
-    const findSumOrder = await of_orders.findAll(opts2);
-    let getSumOrderValue = findSumOrder[0].dataValues.sum_of_orders;
+    let getSumOrderValue = aggregations1 ? aggregations1[0].dataValues.sum_of_orders : null;
+    let getCountOrderValue = aggregations1 ? aggregations1[0].dataValues.count_of_orders : null;
     let response = {
         orders : findOrder,
         meta : {
-          sum_of_orders : getSumOrderValue
+            sum_of_orders : getSumOrderValue,
+            count_of_orders : getCountOrderValue,
+            page : req.query.offset,
+            row : 20
         }
+    }
+    if (req.query?.meta) {
     }
     return success(200, response, 'berhasil mendapatkan data');
 }
