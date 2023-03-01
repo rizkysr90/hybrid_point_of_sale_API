@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       models.of_orders.belongsToMany(models.Product, {through : 'of_orders_details'});
       models.User.hasMany(models.of_orders, fk_userId);
       models.of_orders.belongsTo(models.User, fk_userId);
+      // models.of_orders.hasMany(models.of_orders_details, {foreignKey : 'ofOrderId'});
     }
   }
   of_orders.init({

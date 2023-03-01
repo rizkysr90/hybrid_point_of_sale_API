@@ -20,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
         models.Product.belongsToMany(models.Cart, {through : models.Cart_detail});
         models.Product.hasMany(models.Cart_detail);
         models.Cart_detail.belongsTo(models.Product);
+        
 
     }
   }

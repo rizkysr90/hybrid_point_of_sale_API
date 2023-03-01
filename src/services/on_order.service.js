@@ -4,7 +4,6 @@ const queryInterface = sequelize.getQueryInterface();
 const pagination = require('../utils/pagination.util');
 
 const create = async (req) => {
-    console.log(req.body);
     const creationOrder = await On_order.create({
         id : `TRX-${Date.now()}`,
         CustomerId: req.session.customerId,
