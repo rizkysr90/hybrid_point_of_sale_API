@@ -53,7 +53,7 @@ const getAll = async (req) => {
     opts.limit = row;
     opts.offset = page;
     opts.order = [
-        ['createdAt', 'ASC']
+        ['createdAt', 'DESC']
     ]
     // for meta data required
     let aggregations1 = null;
@@ -85,7 +85,10 @@ const getById = async (req) => {
     const opt = {
         include : [
             {
-                model: Product
+                model: Product,
+                include : {
+                    model : Snap_product
+                }
             },
             {
                 model: User
@@ -97,8 +100,24 @@ const getById = async (req) => {
     const getData = await of_orders.findByPk(req.params.id, opt);
     return success(200,getData,'sukses mendapatkan data');
 }
+
+const destroy = async (req) => {
+    const {transaction_id} = req.params;
+    await of_orders_details.destroy({
+        where : {
+            ofOrderId : transaction_id
+        }
+    })
+    await of_orders.destroy({
+        where : {
+            id : transaction_id
+        }
+    })
+    return success(200, {}, 'berhasil menghapus data');
+}
 module.exports = {
     create,
+    destroy,
     getById,
     getAll
 }

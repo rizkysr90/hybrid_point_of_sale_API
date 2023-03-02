@@ -1,4 +1,4 @@
-const {create, getById, getAll} = require('./../services/of_order.service')
+const {create, getById, getAll, destroy} = require('./../services/of_order.service')
 
 const createOrder = async (req,res,next) => {
     try {
@@ -25,9 +25,18 @@ const getAllOrder = async (req,res,next) => {
         next(error);
     }
 }
+const destroyOrder = async (req,res,next) => {
+    try {
+        const response = await destroy(req);
+        res.status(200).json(response);
+    } catch (error) {
+        next(error);
+    }
+}
 
 module.exports = {
     createOrder,
     getOrderById,
-    getAllOrder
+    getAllOrder,
+    destroyOrder
 }
