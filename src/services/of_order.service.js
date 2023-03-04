@@ -77,28 +77,33 @@ const getAll = async (req) => {
             row : 20
         }
     }
-    if (req.query?.meta) {
-    }
+   
     return success(200, response, 'berhasil mendapatkan data');
 }
 const getById = async (req) => {
     const opt = {
         include : [
             {
-                model: Product,
-                include : {
-                    model : Snap_product
-                }
-            },
-            {
                 model: User
-            },
+            }
             
         ]
             
     }
-    const getData = await of_orders.findByPk(req.params.id, opt);
-    return success(200,getData,'sukses mendapatkan data');
+    const opt1 = {
+        where : {
+            ofOrderId : req.params.id
+        },
+        include : [
+            {
+                model: Snap_product
+            }
+        ]
+    }
+    const getOrders = await of_orders.findByPk(req.params.id, opt);
+    const getOrdersDetails = await of_orders_details.findAll(opt1);
+    const response = { order : getOrders, order_details : getOrdersDetails};
+    return success(200,response,'sukses mendapatkan data');
 }
 
 const destroy = async (req) => {

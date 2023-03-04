@@ -2,6 +2,7 @@ const { Product, product_category, Snap_product } = require('../../models/index.
 const cloudinary = require('../utils/cloudinary.util');
 const pagination = require('../utils/pagination.util.js');
 const { success, errors:throwError } = require('../utils/response.util.js');
+const { Op } = require('sequelize');
 
 const uploaderImg = async (path,opts) => await cloudinary.uploadCloudinary(path,opts);
 
@@ -10,7 +11,6 @@ const create = async (req) => {
         type: "image",
         folder: "skripsi/images/products"
     }
-    // console.log(req.file);
     const up = await uploaderImg(req.file.path, optionsCloudinary);
     const {public_id, eager} = up;
     const secure_url = eager[0].secure_url;
@@ -32,7 +32,10 @@ const create = async (req) => {
 }
 
 const getAll = async (req) => {
-    const {page, row} = pagination(req.body.page, req.body.row);
+    req.query.page = req.query.page ? req.query.page : 1;
+    const {page, row} = pagination(req.query.page, req.query.row);
+    const { search } = req.query;
+    const {c : category} = req.query;
     const opt = {
         order : [
             ['name', 'ASC']
@@ -44,10 +47,28 @@ const getAll = async (req) => {
         offset: page
 
     }
+    if ( search ) {
+        opt.where = {
+            name : {
+                [Op.iLike]: `%${search}%`
+            }
+        }
+    }
+    if (category) {
+        opt.where = {
+            product_category_id : Number(category)
+        }
+    }
 
-    const getData = await Product.findAll(opt);
-
-    return success(200,getData,'sukses mendapatkan data');
+    const {count, rows} = await Product.findAndCountAll(opt);
+    const response = {
+        products : rows,
+        meta : {
+            count,
+            page
+        }
+    }
+    return success(200,response,'sukses mendapatkan data');
 }
 const getById = async (req) => {
     const opt = {
