@@ -47,6 +47,46 @@ const loginCustomer = async (req,res,next) => {
         next(error)
     }
 }
+const refreshOtp = async (req,res,next) => {
+    try {
+        const response = await authService.refreshOtpReg(req);
+        res.status(200).json(response);
+    } catch (error) {
+        next(error)
+    }
+}
+const verifyNewCust = async (req,res,next) => {
+    try {
+        const response = await authService.verifyNewCust(req);
+        res.status(200).json(response);
+    } catch (error) {
+        next(error)
+    }
+}
+const forgotPassword = async (req,res,next) => {
+    try {
+        const response = await authService.forgot_password(req);
+        res.status(200).json(response);
+    } catch (error) {
+        next(error)
+    }
+}
+const verifyForgotPass = async (req,res,next) => {
+    try {
+        const response = await authService.verifyForgotPass(req);
+        res.status(200).json(response);
+    } catch (error) {
+        next(error)
+    }
+}
+const resetPassword = async (req,res,next) => {
+    try {
+        const response = await authService.resetPassword(req);
+        res.status(200).json(response);
+    } catch (error) {
+        next(error)
+    }
+}
 const me = async (req,res,next) => {
     try {
         const response = await authService.me(req);
@@ -58,5 +98,7 @@ const me = async (req,res,next) => {
 
 
 module.exports = {
-    register,login,logout,me,registerCustomer,loginCustomer
+    register,login,logout,me,registerCustomer,loginCustomer,
+    refreshOtp,verifyNewCust,forgotPassword, verifyForgotPass,
+    resetPassword
 }

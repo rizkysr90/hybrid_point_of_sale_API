@@ -4,6 +4,7 @@ const {Op} = require('sequelize');
 const queryInterface = sequelize.getQueryInterface();
 const pagination = require('../utils/pagination.util')
 const create = async (req) => {
+    console.log(req.body);
     const creationOrder = await of_orders.create({
         id : `TRX-${Date.now()}`,
         status : req.body.status,
@@ -17,6 +18,19 @@ const create = async (req) => {
                 product_id : elm.product_id
             },
             order : [['createdAt', 'ASC']]
+        })
+        let productInfo = await Product.findOne({
+            where : {
+                id : elm.product_id
+            }
+        })
+        // change stock 
+        await Product.update({
+            stock : productInfo.stock - elm.qty
+        }, {
+            where : {
+                id : elm.product_id
+            }
         })
         return {
             ofOrderId : creationOrder.id,
@@ -108,6 +122,29 @@ const getById = async (req) => {
 
 const destroy = async (req) => {
     const {transaction_id} = req.params;
+    const transactionInfo = await of_orders_details.findAll({
+        where : {
+            ofOrderId : transaction_id
+        }
+    })
+    if (transactionInfo) {
+        await Promise.all(transactionInfo.map(async (elm) => {
+            
+            let productInfo = await Product.findOne({
+                where : {
+                    id : elm.ProductId
+                }
+            })
+            // change stock 
+            await Product.update({
+                stock : productInfo.stock + elm.qty
+            }, {
+                where : {
+                    id : elm.ProductId
+                }
+            })
+        }));
+    }
     await of_orders_details.destroy({
         where : {
             ofOrderId : transaction_id
