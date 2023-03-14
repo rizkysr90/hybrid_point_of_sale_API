@@ -30,7 +30,17 @@ const create = async (req) => {
     await Snap_product.create(prepSnapData);
     return success(201, {}, 'berhasil menambahkan produk');
 }
+const getNewProduct = async (req) => {
+    const opt = {
+        order : [
+            ['createdAt', 'DESC']
+        ],
+        limit : 12
+    }
+    const getData = await Product.findAll(opt);
+    return success(200, getData, 'sukses mendapatkan data');
 
+}
 const getAll = async (req) => {
     req.query.page = req.query.page ? req.query.page : 1;
     const {page, row} = pagination(req.query.page, req.query.row);
@@ -43,7 +53,7 @@ const getAll = async (req) => {
         include : {
             model : product_category
         },
-        limit: row,
+        limit: 12,
         offset: page
 
     }
@@ -142,5 +152,6 @@ module.exports = {
     getById,
     update,
     destroy,
-    archive
+    archive,
+    getNewProduct
 }
