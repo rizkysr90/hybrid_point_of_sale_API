@@ -46,6 +46,7 @@ const getAll = async (req) => {
     const {page, row} = pagination(req.query.page, req.query.row);
     const { search } = req.query;
     const {c : category} = req.query;
+    const { active } = req.query;
     const opt = {
         order : [
             ['name', 'ASC']
@@ -69,7 +70,11 @@ const getAll = async (req) => {
             product_category_id : Number(category)
         }
     }
-
+    if (active === 'true') {
+        opt.where = {
+            ...opt.where, is_active : true
+        }
+    }
     const {count, rows} = await Product.findAndCountAll(opt);
     const response = {
         products : rows,

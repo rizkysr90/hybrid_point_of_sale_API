@@ -25,8 +25,10 @@ const countMyCart = async (req) => {
 }
 const add = async (req) => {
     const {ProductId, qty} = req.body;
-    console.log('FLAAGGG', qty);
     const userId = req.session.customerId;
+    if (!userId) {
+        throwError(401, {}, 'anda tidak memiliki akses')
+    }
     const findMyCart = await Cart.findOne({
         where : {
             customer_id : userId
@@ -53,6 +55,9 @@ const add = async (req) => {
 
 const getAll = async (req) => {
     const userId = req.session.customerId;
+    if (!userId) {
+        throwError(401, {}, 'anda tidak memiliki akses')
+    }
     const findMyCart = await Cart.findOne({
         where : {
             customer_id : userId
@@ -66,7 +71,7 @@ const getAll = async (req) => {
                 {
                     model : Product,
                     attributes : ['id', 'name', 'stock', 'product_weight'
-                    ,'shipping_weight', 'url_img', 'sell_price']
+                    ,'shipping_weight', 'url_img', 'sell_price'],
                 }
                
             ]
@@ -78,6 +83,9 @@ const getAll = async (req) => {
 }
 const updateQty = async (req) => {
     const userId = req.session.customerId;
+    if (!userId) {
+        throwError(401, {}, 'anda tidak memiliki akses')
+    }
     const findMyCart = await Cart.findOne({
         where : {
             customer_id : userId
@@ -93,7 +101,9 @@ const updateQty = async (req) => {
 }
 const remove = async (req) => {
     const userId = req.session.customerId;
-    console.log('req body', req.body);
+    if (!userId) {
+        throwError(401, {}, 'anda tidak memiliki akses')
+    }
     const findMyCart = await Cart.findOne({
         where : {
             customer_id : userId
