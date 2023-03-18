@@ -1,11 +1,41 @@
 const { On_order, On_orders_detail, Product, sequelize  } = require('../../models/index.js');
 const {errors : throwError, success} = require('../utils/response.util');
 const queryInterface = sequelize.getQueryInterface();
+const { Op } = require("sequelize");
 const pagination = require('../utils/pagination.util');
 
 const create = async (req) => {
+    // Verifikasi validasi produk
+    let orderedProductId = [];
+    req.body.products.forEach((elm) => {
+        orderedProductId.push(elm.id);
+    })
+    let findOrderedProducts = await Product.findAll({
+        where : {
+            id : {
+                [Op.in] : orderedProductId
+            }
+        }
+    })
+    if (findOrderedProducts.length !== orderedProductId.length) {
+        throwError(404, {}, 'produk tidak ditemukan')
+    }
+  
+    findOrderedProducts.forEach((elm, idx) => {
+        if (elm.stock < req.body.products[idx].qty ) {
+            throwError(400, {}, 'produk habis')
+        }
+        if (!elm.is_active || !elm.is_sold_online) {
+            throwError(400, {}, 'produk tidak aktif')
+        }
+    })
+    let idOrder = "";
+    for(let i = 0; i < 3; i++) {
+        idOrder += `${Math.floor(Math.random() * 10)}`
+    }
+    let unixTime = String(Date.now()).slice(-3);
     const creationOrder = await On_order.create({
-        id : `TRX-${Date.now()}`,
+        id : `${req.session.customerId}-${idOrder}-${unixTime}`,
         CustomerId: req.session.customerId,
         notes : req.body.notes,
         status : req.body.status,
@@ -19,8 +49,7 @@ const create = async (req) => {
 
     })
     let newArr = [];
-    if (req.body.products.length < 2) {
-        newArr = req.body.products.map((elm,idx) => {
+    newArr = req.body.products.map((elm,idx) => {
         return {
             OnOrderId : creationOrder.id,
             ProductId : elm.id,
@@ -30,20 +59,11 @@ const create = async (req) => {
             updatedAt : new Date()
         }
     })
-    } else {
-        newArr = req.body.products.map((elm,idx) => {
-            return {
-                OnOrderId : creationOrder.id,
-                ProductId : elm.id,
-                qty : elm.Cart_detail.qty,
-                sum_price_each: elm.Cart_detail.qty * elm.sell_price,
-                createdAt : new Date(),
-                updatedAt : new Date()
-            }
-        })
-    }
-    queryInterface.bulkInsert('On_orders_details', newArr);
-    return success(201, {order_id : creationOrder.id}, 'berhasil menambahkan data order');
+    
+    // queryInterface.bulkInsert('On_orders_details', newArr);
+    return success(201, {}, 'berhasil menambahkan data order');
+
+    // return success(201, {order_id : creationOrder.id}, 'berhasil menambahkan data order');
 }
 
 const getAll = async (req) => {
