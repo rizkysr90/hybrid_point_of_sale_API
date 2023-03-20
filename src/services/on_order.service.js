@@ -3,6 +3,9 @@ const {errors : throwError, success} = require('../utils/response.util');
 const queryInterface = sequelize.getQueryInterface();
 const { Op } = require("sequelize");
 const pagination = require('../utils/pagination.util');
+const cloudinary = require('../utils/cloudinary.util');
+const uploaderImg = async (path,opts) => await cloudinary.uploadCloudinary(path,opts);
+
 
 const create = async (req) => {
     // Verifikasi validasi produk
@@ -46,7 +49,6 @@ const create = async (req) => {
     }))
     
     let unixTime = String(Date.now()).slice(-3);
-    console.log('iniiii', req.body);
     const creationOrder = await On_order.create({
         id : `${req.session.customerId}-${idOrder}-${unixTime}`,
         CustomerId: req.session.customerId,
@@ -60,7 +62,8 @@ const create = async (req) => {
         shipping_address : req.body.shipping_address,
         qty_product : req.body.qty_product,
         lat : req.body.lat,
-        lng : req.body.lng
+        lng : req.body.lng,
+        pay_method : req.body.pay_method
 
     })
     let newArr = [];
@@ -90,6 +93,44 @@ const create = async (req) => {
 
     // return success(201, {order_id : creationOrder.id}, 'berhasil menambahkan data order');
 }
+const updatePayment = async (req) => {
+    if (!req.file) {
+        throwError(400, {}, 'mohon lampirkan bukti transfer')
+    }
+    if (!req.session.customerId) {
+        throwError(401, {}, 'anda tidak memiliki akses');
+    }
+    const findTransaction = await On_order.findByPk(req.body.orderId);
+    if (!findTransaction) {
+        throwError(404, {} , 'data transaksi tidak ditemukan');
+    }
+    if (findTransaction.dataValues.CustomerId !== req.session.customerId) {
+        throwError(401, {}, 'anda tidak memiliki akses');
+    }
+    if (findTransaction.dataValues.pay_status) {
+        throwError(400, {}, 'transaksi sudah dibayar');
+    }
+    const optionsCloudinary = {
+        type: "image",
+        folder: "skripsi/images/bukti_tf"
+    }
+    const up = await uploaderImg(req.file.path, optionsCloudinary);
+    const {eager} = up;
+    const secure_url = eager[0].secure_url;
+  
+
+    await On_order.update({
+        status : 'dibayar',
+        evidence_of_tf : secure_url,
+        paidAt : new Date()
+    }, {
+        where : {
+            id : req.body.orderId
+        }
+    })
+    return success(200, {}, 'berhasil mengupload bukti pembayaran');
+
+}
 
 const getAll = async (req) => {
     if (!req.session.customerId) {
@@ -112,7 +153,7 @@ const getAll = async (req) => {
             ]
         ,
         attributes : ['id','createdAt','amount','qty_product'
-                    ,'pay_status','status','shipping_method'],
+                    ,'pay_status','status','shipping_method', 'pay_method'],
         limit: row,
         offset: page
     }
@@ -139,5 +180,6 @@ const getById = async (req) => {
 module.exports = {
     create,
     getAll,
-    getById
+    getById,
+    updatePayment
 }

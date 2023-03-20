@@ -5,7 +5,6 @@ const {errors : throwError, success} = require('../utils/response.util');
 
 const countMyCart = async (req) => {
     const userId = req.session.customerId;
-    console.log('ini', userId);
     const findMyCart = await Cart.findOne({
         where : {
             customer_id : userId
