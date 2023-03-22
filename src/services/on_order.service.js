@@ -1,4 +1,4 @@
-const { On_order, On_orders_detail, Cart, Cart_detail, Product, sequelize  } = require('../../models/index.js');
+const { On_order, Customer, Cart, Cart_detail, Product, sequelize  } = require('../../models/index.js');
 const {errors : throwError, success} = require('../utils/response.util');
 const queryInterface = sequelize.getQueryInterface();
 const { Op } = require("sequelize");
@@ -6,7 +6,86 @@ const pagination = require('../utils/pagination.util');
 const cloudinary = require('../utils/cloudinary.util');
 const uploaderImg = async (path,opts) => await cloudinary.uploadCloudinary(path,opts);
 
+const getSuccessOrder = async (req) => {
+    let {startDate, endDate} = req.query;
+    [startDate] = startDate.split('T');
+    [endDate] = endDate.split('T');
+    startDate = startDate + ' ' + '00:00:00.000';
+    endDate = endDate + ' ' + '23:59:59.999';
 
+    let {offset} = req.query;
+    let {page, row} = pagination(offset, 20);
+    let opts = {};
+    let opts2 = {};
+    opts.where = {
+        status : 'selesai',
+        createdAt : {
+            [Op.between]: [startDate, endDate],
+        }
+    }
+    opts.limit = row;
+    opts.offset = page;
+    opts.order = [
+        ['createdAt', 'DESC']
+    ]
+     // for meta data required
+     let aggregations1 = null;
+     if (req.query?.meta) {
+         opts2 = {...opts, order : null, limit : null, offset : null};
+         opts2.attributes = [[sequelize.fn('SUM', sequelize.col('amount')), 'sum_of_orders'],
+                             [sequelize.fn('COUNT', sequelize.col('id')), 'count_of_orders']    
+         ]
+         aggregations1 = await On_order.findAll(opts2);
+ 
+     }
+    console.log(opts, 'okkk');
+
+     const findOrder = await On_order.findAll(opts);
+     let getSumOrderValue = aggregations1 ? aggregations1[0].dataValues.sum_of_orders : null;
+     let getCountOrderValue = aggregations1 ? aggregations1[0].dataValues.count_of_orders : null;
+     let response = {
+         orders : findOrder,
+         meta : {
+             sum_of_orders : getSumOrderValue,
+             count_of_orders : getCountOrderValue,
+             page : req.query.offset,
+             row : 20
+         }
+     }
+    
+     return success(200, response, 'berhasil mendapatkan data');
+
+}
+const processOrder = async (req) => {
+    const {orderId} = req.body;
+    const {onProcess, readyPickup, finish} = req.query; 
+    let status = '';
+    if (onProcess) {
+        status = 'diproses'
+    }
+    if (readyPickup) {
+        status = 'ready_to_pickup'
+    }
+    if (finish) {
+        status = 'selesai'
+    }
+    const findOrder = await On_order.findOne({
+        where : {
+            id : orderId
+        }
+    })
+    if (!findOrder) {
+        throwError(404,{},'order tidak ditemukan');
+    }
+    await On_order.update({
+        status
+    }, {
+        where : {
+            id : orderId
+        }
+    })
+    return success(200, {}, 'berhasil memproses pesanan');
+}
 const create = async (req) => {
     // Verifikasi validasi produk
     let orderedProductId = [];
@@ -131,7 +210,36 @@ const updatePayment = async (req) => {
     return success(200, {}, 'berhasil mengupload bukti pembayaran');
 
 }
+const getAllAdmin = async (req) => {
+    if (!req.session.userId) {
+        throwError(401, {}, 'anda tidak memiliki akses');
+    }
+    const {page, row} = pagination(req.body.page, req.body.row);
+    const opt = {
+        order : [
+            ['createdAt', 'DESC']
+        ],
+        include : [
+                {
+                    model : Product,
+                    attributes : ['id', 'name', 'url_img']
+                },
+                {
+                    model : Customer,
+                    attributes : ['id', 'email']
 
+                }
+               
+            ]
+        ,
+        attributes : ['id','createdAt','amount','qty_product'
+                    ,'pay_status','status','shipping_method', 'pay_method'],
+        limit: row,
+        offset: page
+    }
+    const getData = await On_order.findAll(opt);
+    return success(200,getData,'sukses mendapatkan data');
+}
 const getAll = async (req) => {
     if (!req.session.customerId) {
         throwError(401, {}, 'anda tidak memiliki akses');
@@ -181,5 +289,8 @@ module.exports = {
     create,
     getAll,
     getById,
-    updatePayment
+    getAllAdmin,
+    updatePayment,
+    processOrder,
+    getSuccessOrder
 }
