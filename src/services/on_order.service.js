@@ -7,6 +7,7 @@ const {
   On_orders_detail,
   sequelize,
 } = require("../../models/index.js");
+const convertToCountryCode = require("./../utils/sanitizeCountryCodePhone.js");
 const { errors: throwError, success } = require("../utils/response.util");
 const queryInterface = sequelize.getQueryInterface();
 const { Op } = require("sequelize");
@@ -107,6 +108,7 @@ const processOrder = async (req) => {
 };
 const create = async (req) => {
   // Verifikasi validasi produk
+  const sanitasiNomorHp = convertToCountryCode(req.body.whatsapp);
   let orderedProductId = [];
   req.body.products.forEach((elm) => {
     orderedProductId.push(elm.id);
@@ -166,6 +168,7 @@ const create = async (req) => {
     shipping_distance: req.body.shipping_distance,
     shipping_address: req.body.shipping_address,
     qty_product: req.body.qty_product,
+    whatsapp: sanitasiNomorHp,
     lat: req.body.lat,
     lng: req.body.lng,
     pay_method: req.body.pay_method,

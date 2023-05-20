@@ -5,8 +5,19 @@ const verifyAuth = require("./../middlewares/verifyLogin.middleware");
 const verifyAdmin = require("./../middlewares/verifyUser.middleware");
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
+const { body, param } = require("express-validator");
+const validator = require("./../middlewares/validator.middleware");
 
-router.post("/", on_order_controller.createOrder);
+router.post(
+  "/",
+  body("whatsapp").notEmpty().bail().withMessage("nomor whatsapp wajib diisi"),
+  body("whatsapp")
+    .isMobilePhone(["id-ID"])
+    .bail()
+    .withMessage("format nomor whatsapp tidak valid"),
+  validator,
+  on_order_controller.createOrder
+);
 router.get("/", on_order_controller.getMyOrder);
 router.get("/finish", on_order_controller.getFinishOrder);
 router.get("/all", verifyAdmin, on_order_controller.getAllOrder);
