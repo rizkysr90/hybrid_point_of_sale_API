@@ -27,7 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     credentials: true,
-    origin: ["https://hybridpointofsaleapi-production.up.railway.app"],
+    origin: ["https://pos-skripsi-ui.vercel.app/"],
   })
 );
 app.use(
