@@ -27,7 +27,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     credentials: true,
-    origin: ["https://pos-skripsi-ui.vercel.app"],
+    origin: [
+      "https://pos-skripsi-ui.vercel.app",
+      "https://ecommerce-skripsi.vercel.app",
+    ],
   })
 );
 app.use(
