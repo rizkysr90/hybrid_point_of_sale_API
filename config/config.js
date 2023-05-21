@@ -33,6 +33,7 @@ module.exports = {
     password: `${process.env.DB_PASSWORD}`,
     database: `${process.env.DB_NAME}`,
     host: `${process.env.DB_PASSWORD}`,
+    port: `${process.env.DB_PORT}`,
     dialect: "postgres",
     dialectOptions: {
       ssl: {
