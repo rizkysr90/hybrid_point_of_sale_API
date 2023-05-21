@@ -32,9 +32,13 @@ module.exports = {
     username: `${process.env.DB_USERNAME}`,
     password: `${process.env.DB_PASSWORD}`,
     database: `${process.env.DB_NAME}`,
-    host: `${process.env.PROD_DB_HOST}`,
+    host: `${process.env.DB_PASSWORD}`,
     dialect: "postgres",
     dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
       useUTC: false, //for reading from database
       dateStrings: true,
       typeCast: function (field, next) {
