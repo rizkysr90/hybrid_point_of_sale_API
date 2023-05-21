@@ -24,7 +24,12 @@ const store = new sessionStore({
 app.use(morgan("tiny"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use(
+  cors({
+    credentials: true,
+    origin: ["https://hybridpointofsaleapi-production.up.railway.app"],
+  })
+);
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
