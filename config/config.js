@@ -46,5 +46,6 @@ module.exports = {
       },
     },
     timezone: "+07:00",
+    logging: false,
   },
 };
