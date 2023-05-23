@@ -40,9 +40,11 @@ app.use(
     resave: false,
     saveUninitialized: true,
     store: store,
+    proxy: true,
+    name: "skripsiId",
     cookie: {
       secure: "true",
-      httpOnly: true,
+      httpOnly: "true",
       sameSite: "none",
       maxAge: 3 * 24 * 60 * 60 * 1000, //user won't have to login for 3 days
     },
