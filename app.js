@@ -29,6 +29,8 @@ app.use(
     credentials: true,
     origin: [
       "http://localhost:3001",
+      "https://store.bemfisipunsika.website",
+      "https://pos.bemfisipunsika.website",
       "http://localhost:3000",
       "https://pos-skripsi-ui.vercel.app",
       "https://ecommerce-skripsi.vercel.app",
