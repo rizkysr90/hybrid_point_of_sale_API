@@ -29,6 +29,7 @@ app.use(
     credentials: true,
     origin: [
       "http://localhost:3001",
+      "http://localhost:3000",
       "https://pos-skripsi-ui.vercel.app",
       "https://ecommerce-skripsi.vercel.app",
     ],
@@ -40,12 +41,12 @@ app.use(
     resave: false,
     saveUninitialized: true,
     store: store,
-    proxy: true,
+    proxy: process.env.NODE_ENV === "production" ? true : false,
     // name: "skripsiId",
     cookie: {
-      secure: "true",
-      httpOnly: "true",
-      sameSite: "none",
+      secure: process.env.NODE_ENV === "production" ? "true" : "auto",
+      httpOnly: process.env.NODE_ENV === "production" ? "true" : "false",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 3 * 24 * 60 * 60 * 1000, //user won't have to login for 3 days
     },
   })
