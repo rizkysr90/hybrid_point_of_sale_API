@@ -28,6 +28,7 @@ app.use(
   cors({
     credentials: true,
     origin: [
+      "http://localhost:3001",
       "https://pos-skripsi-ui.vercel.app",
       "https://ecommerce-skripsi.vercel.app",
     ],
@@ -41,6 +42,7 @@ app.use(
     store: store,
     cookie: {
       secure: "auto",
+      maxAge: 3 * 24 * 60 * 60 * 1000, //user won't have to login for 3 days
     },
   })
 );
