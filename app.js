@@ -41,7 +41,7 @@ app.use(
     saveUninitialized: true,
     store: store,
     proxy: true,
-    name: "skripsiId",
+    // name: "skripsiId",
     cookie: {
       secure: "true",
       httpOnly: "true",
