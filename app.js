@@ -44,7 +44,7 @@ app.use(
     saveUninitialized: true,
     store: store,
     proxy: process.env.NODE_ENV === "production" ? true : false,
-    // name: "skripsiId",
+    name: "rizkiplastik_session",
     cookie: {
       secure: process.env.NODE_ENV === "production" ? "true" : "auto",
       httpOnly: process.env.NODE_ENV === "production" ? "true" : "false",
