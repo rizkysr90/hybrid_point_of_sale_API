@@ -34,6 +34,14 @@ const getSuccessOrder = async (req) => {
     createdAt: {
       [Op.between]: [startDate, endDate],
     },
+    [Op.or]: [
+      {
+        status: "selesai",
+      },
+      {
+        status: "batal",
+      },
+    ],
   };
   opts.limit = row;
   opts.offset = page;
@@ -51,6 +59,16 @@ const getSuccessOrder = async (req) => {
       [sequelize.fn("SUM", sequelize.col("amount")), "sum_of_orders"],
       [sequelize.fn("COUNT", sequelize.col("id")), "count_of_orders"],
     ];
+    opts2.where = {
+      createdAt: {
+        [Op.between]: [startDate, endDate],
+      },
+      [Op.or]: [
+        {
+          status: "selesai",
+        },
+      ],
+    };
     aggregations1 = await On_order.findAll(opts2);
   }
 

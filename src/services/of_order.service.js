@@ -136,6 +136,10 @@ const getAll = async (req) => {
       [sequelize.fn("SUM", sequelize.col("amount")), "sum_of_orders"],
       [sequelize.fn("COUNT", sequelize.col("id")), "count_of_orders"],
     ];
+    opts2.where = {
+      ...opts2.where,
+      status: "selesai",
+    };
     aggregations1 = await of_orders.findAll(opts2);
   }
   const findOrder = await of_orders.findAll(opts);
