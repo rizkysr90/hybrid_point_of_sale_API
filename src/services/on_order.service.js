@@ -341,33 +341,50 @@ const getById = async (req) => {
 };
 const cancelled = async (req) => {
   const { transaction_id } = req.params;
+  const findTrx = await On_order.findOne({
+    where: {
+      id: transaction_id,
+    },
+  });
+  if (!findTrx) {
+    // kalo transaksi tidak ditemukan
+    throwError(404, {}, "transaksi tidak ditemukan");
+  }
+  if (findTrx.status === "batal") {
+    throwError(
+      400,
+      {},
+      "gagal membatalkan, transaksi sudah dibatalkan sebelumnya"
+    );
+  }
   const transactionInfo = await On_orders_detail.findAll({
     where: {
       OnOrderId: transaction_id,
     },
   });
-  if (transactionInfo) {
-    await Promise.all(
-      transactionInfo.map(async (elm) => {
-        let productInfo = await Product.findOne({
-          where: {
-            id: elm.ProductId,
-          },
-        });
-        // change stock
-        await Product.update(
-          {
-            stock: productInfo.stock + elm.qty,
-          },
-          {
+  if (transactionInfo)
+    if (transactionInfo) {
+      await Promise.all(
+        transactionInfo.map(async (elm) => {
+          let productInfo = await Product.findOne({
             where: {
               id: elm.ProductId,
             },
-          }
-        );
-      })
-    );
-  }
+          });
+          // change stock
+          await Product.update(
+            {
+              stock: productInfo.stock + elm.qty,
+            },
+            {
+              where: {
+                id: elm.ProductId,
+              },
+            }
+          );
+        })
+      );
+    }
   await On_order.update(
     { status: "batal", pay_status: false },
     {
