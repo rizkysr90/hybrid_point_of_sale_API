@@ -25,6 +25,8 @@
     "cloudinary": "^1.33.0",
     "connect-session-sequelize": "^7.1.5",
     "cors": "^2.8.5",
+    "csv-generate": "^4.2.6",
+    "csv-stringify": "^6.4.0",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
@@ -36,7 +38,8 @@
     "nodemon": "^2.0.20",
     "pg": "^8.8.0",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.27.0"
+    "sequelize": "^6.27.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0"

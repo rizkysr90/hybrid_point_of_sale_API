@@ -10,6 +10,7 @@ const { success } = require("../utils/response.util.js");
 const { Op } = require("sequelize");
 const queryInterface = sequelize.getQueryInterface();
 const pagination = require("../utils/pagination.util");
+const { errors: throwErr } = require("../utils/response.util.js");
 const cancelled = async (req) => {
   const { transaction_id } = req.params;
   const transactionInfo = await of_orders_details.findAll({
@@ -50,6 +51,9 @@ const cancelled = async (req) => {
   return success(200, {}, "berhasil membatalkan transaksi");
 };
 const create = async (req) => {
+  if (!req.body.pay_amount) {
+    throwErr(400, {}, "masukkan jumlah pembayaran dengan sesuai");
+  }
   const creationOrder = await of_orders.create({
     id: `TRX-${Date.now()}`,
     status: req.body.status,
@@ -70,6 +74,12 @@ const create = async (req) => {
           id: elm.product_id,
         },
       });
+      if (productInfo.stock <= 0) {
+        throwErr(400, {}, `stok produk ${productInfo.name} habis`);
+      }
+      if (productInfo.stock < elm.qty) {
+        throwErr(400, {}, `stok produk ${productInfo.name} tidak mencukupi`);
+      }
       // change stock
       await Product.update(
         {
