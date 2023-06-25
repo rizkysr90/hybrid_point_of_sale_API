@@ -23,8 +23,8 @@ router.post(
   upload.single("product_img"),
   productController.createProduct
 );
-router.get("/summary", verifyLogin, productController.summaryStock);
-router.get("/summaryexcel", verifyLogin, productController.summaryExcel);
+router.get("/summary", productController.summaryStock);
+router.get("/summaryexcel", productController.summaryExcel);
 router.get("/", productController.getAllProduct);
 router.get("/new", productController.getNewProd);
 router.get("/:id", productController.getProductById);
