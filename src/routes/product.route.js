@@ -8,18 +8,18 @@ const { body } = require("express-validator");
 router.post(
   "/",
   verifyLogin,
-  body([
-    "name",
-    "product_category_id",
-    "stock",
-    "product_weight",
-    "buy_price",
-    "sell_price",
-  ])
-    .notEmpty()
-    .bail()
-    .withMessage("field dengan keterangan wajib, wajib diisi"),
-  validate,
+  // // body([
+  // //   "name",
+  // //   "product_category_id",
+  // //   "stock",
+  // //   "product_weight",
+  // //   "buy_price",
+  // //   "sell_price",
+  // // ])
+  // //   .notEmpty()
+  // //   .bail()
+  // //   .withMessage("field dengan keterangan wajib, wajib diisi"),
+  // validate,
   upload.single("product_img"),
   productController.createProduct
 );
